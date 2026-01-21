@@ -1,0 +1,64 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'WASM version (e.g., 0.0.46.1)'
+        required: true
+      t_ruby_version:
+        description: 't-ruby version (e.g., 0.0.46, defaults to latest)'
+        required: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Extract version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.version }}"
+            T_RUBY_VERSION="${{ inputs.t_ruby_version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+            T_RUBY_VERSION=""
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "t_ruby_version=$T_RUBY_VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Build
+        run: npm run build
+
+      - name: Update version
+        run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ steps.version.outputs.version }}"
+          generate_release_notes: true
+          files: |
+            dist/*
+            package.json

@@ -1,0 +1,69 @@
+{
+  "name": "@t-ruby/wasm",
+  "version": "0.0.46",
+  "description": "T-Ruby compiler running in WebAssembly for browser environments",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ko.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:wasm": "node scripts/build-wasm.mjs",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "t-ruby",
+    "ruby",
+    "typescript",
+    "wasm",
+    "webassembly",
+    "type-checker",
+    "compiler"
+  ],
+  "author": "Y. Fred Kim <yhkks1038@gmail.com>",
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/type-ruby/t-ruby-wasm.git"
+  },
+  "homepage": "https://type-ruby.github.io",
+  "bugs": {
+    "url": "https://github.com/type-ruby/t-ruby-wasm/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.7",
+    "eslint": "^9.18.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.2"
+  },
+  "dependencies": {
+    "@ruby/3.4-wasm-wasi": "^2.8.1",
+    "@ruby/wasm-wasi": "^2.8.1"
+  },
+  "t-ruby": {
+    "minVersion": "0.0.46"
+  }
+}
