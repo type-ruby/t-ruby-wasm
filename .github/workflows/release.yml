@@ -74,20 +74,8 @@ jobs:
       - name: Update version
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
-      - name: Debug - Check token
-        run: |
-          if [ -z "${{ secrets.NPM_TOKEN }}" ]; then
-            echo "NPM_TOKEN is empty!"
-          else
-            echo "NPM_TOKEN is set (length: ${#NPM_TOKEN})"
-          fi
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish to npm
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
