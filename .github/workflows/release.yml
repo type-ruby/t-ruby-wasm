@@ -30,6 +30,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Upgrade npm for OIDC trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
       - name: Install dependencies
         run: npm install
 
@@ -73,11 +78,8 @@ jobs:
       - name: Update version
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
-      - name: Setup npm for trusted publishing
-        uses: azu/setup-npm-trusted-publish@v1.0.3
-
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish --access public --provenance
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
