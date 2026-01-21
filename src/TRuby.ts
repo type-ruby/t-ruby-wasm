@@ -4,7 +4,6 @@ import type { TypeCheckResult } from "./types/TypeCheckResult.js";
 import type { VersionInfo } from "./types/VersionInfo.js";
 import type { VirtualFile } from "./types/VirtualFile.js";
 import type { RubyVM } from "./vm/RubyVM.js";
-import type { DefaultRubyVMResult } from "./vm/DefaultRubyVM.js";
 import { VirtualFileSystem } from "./VirtualFileSystem.js";
 import { escapeRubyString } from "./utils/escapeRubyString.js";
 import { T_RUBY_INIT_SCRIPT } from "./vm/TRubyInitScript.js";
@@ -33,7 +32,7 @@ export class TRuby {
       const r = await this.evalJson<CompileResult>(
         `TRuby::Compiler.compile(${escapeRubyString(source)}, filename: ${escapeRubyString(filename)}).to_json`
       );
-      return { success: !r.errors?.length, ...r };
+      return { ...r, success: !r.errors?.length };
     } catch (e) {
       return { success: false, errors: [{ message: String(e) }] };
     }
@@ -76,10 +75,12 @@ export class TRuby {
   isInitialized(): boolean { return this.initialized; }
 
   private async loadWasm(): Promise<RubyVM> {
-    const { DefaultRubyVM } = await import("@ruby/wasm-wasi");
+    // @ts-expect-error - DefaultRubyVM is exported from browser subpath
+    const { DefaultRubyVM } = await import("@ruby/wasm-wasi/dist/browser");
     const url = new URL("@ruby/3.4-wasm-wasi/dist/ruby+stdlib.wasm", import.meta.url);
     const mod = await WebAssembly.compileStreaming(fetch(url));
-    return ((await DefaultRubyVM(mod)) as DefaultRubyVMResult).vm;
+    const result = await DefaultRubyVM(mod);
+    return result.vm as RubyVM;
   }
 
   private async evalJson<T>(code: string): Promise<T> {
