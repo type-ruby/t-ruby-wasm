@@ -74,7 +74,7 @@ jobs:
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Setup npm for trusted publishing
-        uses: azu/setup-npm-trusted-publish@v1
+        uses: azu/setup-npm-trusted-publish@v1.0.3
 
       - name: Publish to npm
         run: npm publish --access public
