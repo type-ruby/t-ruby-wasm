@@ -75,7 +75,6 @@ export class TRuby {
   isInitialized(): boolean { return this.initialized; }
 
   private async loadWasm(): Promise<RubyVM> {
-    // @ts-expect-error - DefaultRubyVM is exported from browser subpath
     const { DefaultRubyVM } = await import("@ruby/wasm-wasi/dist/browser");
     const url = new URL("@ruby/3.4-wasm-wasi/dist/ruby+stdlib.wasm", import.meta.url);
     const mod = await WebAssembly.compileStreaming(fetch(url));
