@@ -73,8 +73,11 @@ jobs:
       - name: Update version
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
+      - name: Setup npm for trusted publishing
+        uses: azu/setup-npm-trusted-publish@v1
+
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: npm publish --access public
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
