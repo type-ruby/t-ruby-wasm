@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# Vendor (t-ruby source copied during CI build)
+vendor/
+
 # IDE
 .idea/
 .vscode/

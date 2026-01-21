@@ -41,9 +41,29 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/v}
             T_RUBY_VERSION=""
           fi
+          # t_ruby_version이 없으면 version과 동일하게 설정
+          if [[ -z "$T_RUBY_VERSION" ]]; then
+            T_RUBY_VERSION="$VERSION"
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "t_ruby_version=$T_RUBY_VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing version: $VERSION"
+          echo "Publishing version: $VERSION (t-ruby: $T_RUBY_VERSION)"
+
+      - name: Clone t-ruby source
+        run: |
+          git clone --depth 1 --branch v${{ steps.version.outputs.t_ruby_version }} \
+            https://github.com/type-ruby/t-ruby.git /tmp/t-ruby
+          echo "Cloned t-ruby v${{ steps.version.outputs.t_ruby_version }}"
+
+      - name: Copy t-ruby lib to vendor
+        run: |
+          mkdir -p vendor/t-ruby
+          cp -r /tmp/t-ruby/lib/* vendor/t-ruby/
+          echo "Copied t-ruby lib files:"
+          ls -la vendor/t-ruby/
+
+      - name: Bundle t-ruby source
+        run: node scripts/bundle-t-ruby.mjs
 
       - name: Build
         run: npm run build
