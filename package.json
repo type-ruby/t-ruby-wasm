@@ -1,6 +1,6 @@
 {
   "name": "@t-ruby/wasm",
-  "version": "0.0.46",
+  "version": "0.0.46-patch1",
   "description": "T-Ruby compiler running in WebAssembly for browser environments",
   "type": "module",
   "main": "dist/index.cjs",
