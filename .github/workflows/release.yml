@@ -48,9 +48,10 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/v}
             T_RUBY_VERSION=""
           fi
-          # t_ruby_version이 없으면 version과 동일하게 설정
+          # t_ruby_version이 없으면 version에서 베이스 버전 추출
+          # 예: 0.0.46-patch1 -> 0.0.46
           if [[ -z "$T_RUBY_VERSION" ]]; then
-            T_RUBY_VERSION="$VERSION"
+            T_RUBY_VERSION=$(echo "$VERSION" | sed 's/-patch[0-9]*$//')
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "t_ruby_version=$T_RUBY_VERSION" >> $GITHUB_OUTPUT
