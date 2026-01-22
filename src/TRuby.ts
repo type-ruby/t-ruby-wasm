@@ -26,11 +26,17 @@ export class TRuby {
   }
 
   /** Compile T-Ruby source code to Ruby */
-  async compile(source: string, filename = "input.trb"): Promise<CompileResult> {
+  async compile(source: string, _filename = "input.trb"): Promise<CompileResult> {
     this.ensureInit();
     try {
+      // First check if TRuby::Compiler is defined
+      const compilerDefined = await this.vm!.evalAsync("defined?(TRuby::Compiler)");
+      if (!compilerDefined || String(compilerDefined) === "nil") {
+        return { success: false, errors: [{ message: "TRuby::Compiler is not defined. Initialization may have failed." }] };
+      }
+
       const r = await this.evalJson<CompileResult>(
-        `TRuby::Compiler.compile(${escapeRubyString(source)}, filename: ${escapeRubyString(filename)}).to_json`
+        `TRuby::Compiler.new.compile_string(${escapeRubyString(source)}).to_json`
       );
       return { ...r, success: !r.errors?.length };
     } catch (e) {
@@ -59,10 +65,13 @@ export class TRuby {
   /** Get version information */
   async getVersion(): Promise<VersionInfo> {
     this.ensureInit();
-    const [tRuby, ruby] = await Promise.all([
-      this.vm!.evalAsync("TRuby::VERSION") as Promise<string>,
-      this.vm!.evalAsync("RUBY_VERSION") as Promise<string>,
+    const [tRubyVal, rubyVal] = await Promise.all([
+      this.vm!.evalAsync("TRuby::VERSION"),
+      this.vm!.evalAsync("RUBY_VERSION"),
     ]);
+    // evalAsync returns RbValue, need to convert to JS string
+    const tRuby = typeof tRubyVal === 'string' ? tRubyVal : String(tRubyVal);
+    const ruby = typeof rubyVal === 'string' ? rubyVal : String(rubyVal);
     return { tRuby, ruby, rubyWasm: RUBY_WASM_VERSION };
   }
 
@@ -76,8 +85,13 @@ export class TRuby {
 
   private async loadWasm(): Promise<RubyVM> {
     const { DefaultRubyVM } = await import("@ruby/wasm-wasi/dist/browser");
-    const url = new URL("@ruby/3.4-wasm-wasi/dist/ruby+stdlib.wasm", import.meta.url);
-    const mod = await WebAssembly.compileStreaming(fetch(url));
+    // Use CDN for WASM file to ensure cross-bundler compatibility
+    const wasmUrl = `https://cdn.jsdelivr.net/npm/@ruby/3.4-wasm-wasi@${RUBY_WASM_VERSION}/dist/ruby+stdlib.wasm`;
+    const response = await fetch(wasmUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch WASM: ${response.status} ${response.statusText}`);
+    }
+    const mod = await WebAssembly.compileStreaming(response);
     const result = await DefaultRubyVM(mod);
     return result.vm as RubyVM;
   }

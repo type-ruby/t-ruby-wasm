@@ -73,9 +73,9 @@ jobs:
       - name: Copy t-ruby lib to vendor
         run: |
           mkdir -p vendor/t-ruby
-          cp -r /tmp/t-ruby/lib/* vendor/t-ruby/
+          cp -r /tmp/t-ruby/lib vendor/t-ruby/
           echo "Copied t-ruby lib files:"
-          ls -la vendor/t-ruby/
+          ls -la vendor/t-ruby/lib/
 
       - name: Bundle t-ruby source
         run: node scripts/bundle-t-ruby.mjs

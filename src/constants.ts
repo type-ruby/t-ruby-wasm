@@ -5,4 +5,4 @@
  */
 
 /** Current Ruby WASM runtime version */
-export const RUBY_WASM_VERSION = "2.7.0";
+export const RUBY_WASM_VERSION = "2.8.1";

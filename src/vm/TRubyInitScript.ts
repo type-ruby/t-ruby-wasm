@@ -181,10 +181,19 @@ end unless defined?(FileUtils) && FileUtils.respond_to?(:mkdir_p)
 
     // Load each bundled file in dependency order by directly evaling the content
     // Using heredoc syntax to avoid complex escaping issues
+    script += `
+puts "[T-Ruby WASM] Starting file loading..."
+puts "[T-Ruby WASM] Bundle has #{${Object.keys(T_RUBY_BUNDLE).length}} files"
+`;
+
     for (let i = 0; i < T_RUBY_LOAD_ORDER.length; i++) {
       const path = T_RUBY_LOAD_ORDER[i];
       const content = T_RUBY_BUNDLE[path];
-      if (!content) continue;
+      if (!content) {
+        script += `puts "[T-Ruby WASM] SKIP: ${path} (not in bundle)"\n`;
+        continue;
+      }
+      script += `puts "[T-Ruby WASM] Loading: ${path}"\n`;
 
       // Process the content: remove frozen_string_literal and require_relative
       const processedContent = content

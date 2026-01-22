@@ -21,6 +21,7 @@ export function escapeRubyString(str: string): string {
   const escaped = str
     .replace(/\\/g, "\\\\")
     .replace(/"/g, '\\"')
+    .replace(/#\{/g, '\\#{')  // Escape Ruby interpolation
     .replace(/\n/g, "\\n")
     .replace(/\r/g, "\\r")
     .replace(/\t/g, "\\t");
