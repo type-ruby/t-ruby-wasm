@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>T-Ruby WASM E2E Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+    .success { color: #4ec9b0; }
+    .error { color: #f14c4c; }
+    .info { color: #569cd6; }
+    #log { white-space: pre-wrap; line-height: 1.6; }
+    button { padding: 10px 20px; margin: 10px 5px 10px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>T-Ruby WASM E2E Test</h1>
+  <div id="status">Ready</div>
+  <button id="runTest">Run Test</button>
+  <div id="log"></div>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>T-Ruby WASM 테스트</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+    .success { color: #4ec9b0; }
+    .error { color: #f14c4c; }
+    .info { color: #569cd6; }
+    pre { background: #2d2d2d; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    #log { white-space: pre-wrap; line-height: 1.6; }
+    button { padding: 10px 20px; margin: 10px 5px 10px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>T-Ruby WASM 테스트</h1>
+  <button onclick="runTest()">테스트 실행</button>
+  <button onclick="clearLog()">로그 지우기</button>
+  <div id="log"></div>
+
+  <script type="module">
+    const logEl = document.getElementById('log');
+
+    function log(msg, type = '') {
+      const span = document.createElement('span');
+      span.className = type;
+      span.textContent = msg + '\n';
+      logEl.appendChild(span);
+      console.log(msg);
+    }
+
+    window.clearLog = () => { logEl.innerHTML = ''; };
+
+    window.runTest = async () => {
+      clearLog();
+      log('=== T-Ruby WASM 테스트 시작 ===\n', 'info');
+
+      try {
+        log('1. 모듈 import 중...');
+        const { TRuby } = await import('./dist/index.js');
+        log('   ✓ import 완료\n', 'success');
+
+        log('2. TRuby 인스턴스 생성...');
+        const trb = new TRuby();
+        log('   ✓ 인스턴스 생성 완료\n', 'success');
+
+        log('3. initialize() 호출 (WASM 로딩 중, 시간이 걸릴 수 있습니다)...');
+        const initStart = performance.now();
+        await trb.initialize();
+        const initTime = (performance.now() - initStart).toFixed(0);
+        log(`   ✓ 초기화 완료 (${initTime}ms)\n`, 'success');
+
+        log('4. getVersion() 호출...');
+        const version = await trb.getVersion();
+        log(`   ✓ T-Ruby: ${version.tRuby}`, 'success');
+        log(`   ✓ Ruby: ${version.ruby}`, 'success');
+        log(`   ✓ Ruby WASM: ${version.rubyWasm}\n`, 'success');
+
+        log('5. 간단한 컴파일 테스트...');
+        const source = `def foo: Integer
+  42
+end`;
+        log(`   입력:\n${source}\n`, 'info');
+
+        const result = await trb.compile(source);
+        if (result.success) {
+          log('   ✓ 컴파일 성공!', 'success');
+          log(`   출력:\n${result.ruby}\n`, 'info');
+        } else {
+          log('   ✗ 컴파일 실패', 'error');
+          log(`   에러: ${JSON.stringify(result.errors, null, 2)}`, 'error');
+        }
+
+        log('6. 복잡한 코드 컴파일 테스트...');
+        const complexSource = `class User
+  attr_reader name: String
+  attr_reader age: Integer
+
+  def initialize(name: String, age: Integer)
+    @name = name
+    @age = age
+  end
+
+  def greet: String
+    "Hello, my name is \#{@name}"
+  end
+end`;
+        log(`   입력:\n${complexSource}\n`, 'info');
+
+        const result2 = await trb.compile(complexSource);
+        if (result2.success) {
+          log('   ✓ 컴파일 성공!', 'success');
+          log(`   출력:\n${result2.ruby}\n`, 'info');
+        } else {
+          log('   ✗ 컴파일 실패', 'error');
+          log(`   에러: ${JSON.stringify(result2.errors, null, 2)}`, 'error');
+        }
+
+        log('\n=== 모든 테스트 완료! ===', 'success');
+
+      } catch (error) {
+        log('\n❌ 테스트 실패: ' + error.message, 'error');
+        log('스택: ' + error.stack, 'error');
+      }
+    };
+  </script>
+</body>
+</html>

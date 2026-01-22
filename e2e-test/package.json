@@ -1,0 +1,17 @@
+{
+  "name": "t-ruby-wasm-e2e-test",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@ruby/3.4-wasm-wasi": "^2.8.1",
+    "@ruby/wasm-wasi": "^2.8.1"
+  }
+}
