@@ -75,6 +75,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify build output
+        run: |
+          echo "Verifying build output..."
+          ls -la dist/
+          test -f dist/index.js || (echo "ERROR: dist/index.js not found" && exit 1)
+          test -f dist/index.cjs || (echo "ERROR: dist/index.cjs not found" && exit 1)
+          test -f dist/index.d.ts || (echo "ERROR: dist/index.d.ts not found" && exit 1)
+          echo "Build verification passed!"
+
       - name: Update version
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
