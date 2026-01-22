@@ -53,9 +53,16 @@ jobs:
           if [[ -z "$T_RUBY_VERSION" ]]; then
             T_RUBY_VERSION=$(echo "$VERSION" | sed 's/-patch[0-9]*$//')
           fi
+          # prerelease 버전인지 확인 (-patch가 포함되면 prerelease)
+          if [[ "$VERSION" == *"-patch"* ]]; then
+            NPM_TAG="patch"
+          else
+            NPM_TAG="latest"
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "t_ruby_version=$T_RUBY_VERSION" >> $GITHUB_OUTPUT
-          echo "Publishing version: $VERSION (t-ruby: $T_RUBY_VERSION)"
+          echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION (t-ruby: $T_RUBY_VERSION, npm tag: $NPM_TAG)"
 
       - name: Clone t-ruby source
         run: |
@@ -89,7 +96,7 @@ jobs:
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --tag ${{ steps.version.outputs.npm_tag }}
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
